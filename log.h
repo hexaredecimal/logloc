@@ -1,7 +1,10 @@
 #pragma once
 
 #include <iostream>
+
+#ifdef LOG_RANG
 #include <rang.hpp>
+#endif
 #include <sstream>
 #include <string>
 #include <vector>
@@ -151,6 +154,7 @@ void logloc::Log::report() {
     far_back--;
   }
 
+#ifdef LOG_RANG
   int starting_line = line;
   bool start_paint = false;
   while (true) {
@@ -183,10 +187,19 @@ void logloc::Log::report() {
   }
   starting_line -= 1;
   std::cerr << rang::style::reset << std::endl;
+#else
+  std::cerr << get_line_gutter(line) << get_line(m_input_lines, line)
+            << std::endl;
+  std::cerr << get_column_pointer(line, col) << std::endl;
+#endif
 
   int count = 1;
   while (far_forward > 0) {
+#ifdef LOG_RANG
     int next = starting_line + count;
+#else
+    int next = line + count;
+#endif
     if (is_line_valid(m_input_lines, next)) {
       std::cerr << get_line_gutter(next) << get_line(m_input_lines, next)
                 << std::endl;
