@@ -35,7 +35,9 @@ class Log {
   void reveal_lines_before(int lines);
   void reveal_lines_after(int after);
 
+#ifdef LOG_RANG
   void set_marked_chars_foreground(rang::fg fg) { m_log_lines_fg = fg; }
+#else  
 
  private:
   struct Loc {
@@ -55,7 +57,9 @@ class Log {
 
   std::string get_column_pointer(int line, int column);
 
+#ifdef LOG_RANG
   rang::fg m_log_lines_fg = rang::fg::reset;
+#else  
 };
 
 #ifdef LOG_IMPLEMENTATION
