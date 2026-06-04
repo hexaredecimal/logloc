@@ -35,6 +35,8 @@ class Log {
   void reveal_lines_before(int lines);
   void reveal_lines_after(int after);
 
+  void set_marked_chars_foreground(rang::fg fg) { m_log_lines_fg = fg; }
+
  private:
   struct Loc {
     int line;
@@ -52,6 +54,8 @@ class Log {
   int m_reveal_lines_after = 1;
 
   std::string get_column_pointer(int line, int column);
+
+  rang::fg m_log_lines_fg = rang::fg::reset;
 };
 
 #ifdef LOG_IMPLEMENTATION
@@ -168,15 +172,13 @@ void logloc::Log::report() {
       if (_col == m_end.col && starting_line == m_end.line) start_paint = false;
 
       if (start_paint)
-        std::cerr << rang::fg::red;
+        std::cerr << m_log_lines_fg;
       else
         std::cerr << rang::style::reset;
 
       std::cerr << c;
       _col++;
     }
-
-    std::cerr << std::endl;
 
     if (!start_paint) {
       std::cerr << rang::style::reset;
