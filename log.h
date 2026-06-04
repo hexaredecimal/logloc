@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <rang.hpp>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -18,14 +19,10 @@ class Log {
         m_start{1, 1},
         m_end{} {}
 
-  void set_message(std::string& message);
-  void set_kind(std::string& kind);
-  void set_filename(std::string& filename);
+  void set_message(const std::string& message);
+  void set_kind(const std::string& kind);
+  void set_filename(const std::string& filename);
   void set_input_lines(std::vector<std::string> inputlines);
-
-  void set_message(const char* message);
-  void set_kind(const char* kind);
-  void set_filename(const char* filename);
 
   void set_start_info(int, int);
   void set_end_info(int, int);
@@ -56,26 +53,14 @@ class Log {
 
 #ifdef LOG_IMPLEMENTATION
 
-void logloc::Log::set_message(std::string& message) {
+void logloc::Log::set_message(const std::string& message) {
   this->m_message = message;
 }
 
-void logloc::Log::set_kind(std::string& kind) { this->m_kind = kind; }
+void logloc::Log::set_kind(const std::string& kind) { this->m_kind = kind; }
 
-void logloc::Log::set_filename(std::string& filename) {
+void logloc::Log::set_filename(const std::string& filename) {
   this->m_filename = filename;
-}
-
-void logloc::Log::set_message(const char* message) {
-  this->m_message = std::string(message);
-}
-
-void logloc::Log::set_kind(const char* kind) {
-  this->m_kind = std::string(kind);
-}
-
-void logloc::Log::set_filename(const char* filename) {
-  this->m_filename = std::string(filename);
 }
 
 void logloc::Log::set_input_lines(std::vector<std::string> input_lines) {
@@ -108,24 +93,6 @@ static std::string get_line(std::vector<std::string>& lines, int line) {
 static std::string get_line_gutter(int line) {
   return std::to_string(line) + std::string(" | ");
 }
-
-std::string logloc::Log::get_column_pointer(int line, int column) {
-  std::string gutter = get_line_gutter(line);
-
-  std::stringstream ss;
-  for (int i = 0; i < gutter.size(); ++i) ss << " ";
-
-  for (int i = 1; i < column; ++i) ss << " ";
-
-  if (m_end.col == 0 || m_end.col <= column)
-    ss << "^";
-  else {
-    int carets = m_end.col - column + 1;
-    for (int i = 0; i < carets; ++i) ss << "^";
-  }
-  return ss.str();
-}
-
 static bool has_lines_above_line(std::vector<std::string>& source, int line,
                                  int lines = 1) {
   if (!is_line_valid(source, line)) return false;
@@ -183,13 +150,43 @@ void logloc::Log::report() {
     }
     far_back--;
   }
-  std::cerr << get_line_gutter(line) << get_line(m_input_lines, line)
-            << std::endl;
-  std::cerr << get_column_pointer(line, col) << std::endl;
+
+  int starting_line = line;
+  bool start_paint = false;
+  while (true) {
+    std::cerr << rang::style::reset << get_line_gutter(starting_line);
+
+    auto line_string = get_line(m_input_lines, starting_line);
+    int _col = 1;
+    for (char c : line_string) {
+      if (_col == col && starting_line == line) start_paint = true;
+
+      if (_col == m_end.col && starting_line == m_end.line) start_paint = false;
+
+      if (start_paint)
+        std::cerr << rang::fg::red;
+      else
+        std::cerr << rang::style::reset;
+
+      std::cerr << c;
+      _col++;
+    }
+
+    std::cerr << std::endl;
+
+    if (!start_paint) {
+      std::cerr << rang::style::reset;
+    }
+    starting_line++;
+
+    if (starting_line > m_end.line) break;
+  }
+  starting_line -= 1;
+  std::cerr << rang::style::reset << std::endl;
 
   int count = 1;
   while (far_forward > 0) {
-    int next = line + count;
+    int next = starting_line + count;
     if (is_line_valid(m_input_lines, next)) {
       std::cerr << get_line_gutter(next) << get_line(m_input_lines, next)
                 << std::endl;
@@ -198,6 +195,23 @@ void logloc::Log::report() {
     count++;
     far_forward--;
   }
+}
+
+std::string logloc::Log::get_column_pointer(int line, int column) {
+  std::string gutter = get_line_gutter(line);
+
+  std::stringstream ss;
+  for (int i = 0; i < gutter.size(); ++i) ss << " ";
+
+  for (int i = 1; i < column; ++i) ss << " ";
+
+  if (m_end.col == 0 || m_end.col <= column)
+    ss << "^";
+  else {
+    int carets = m_end.col - column + 1;
+    for (int i = 0; i < carets; ++i) ss << "^";
+  }
+  return ss.str();
 }
 
 void logloc::Log::reveal_lines_before(int before) {
