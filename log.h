@@ -4,6 +4,7 @@
 
 #ifdef LOG_RANG
 #include <rang.hpp>
+#else /* */
 #endif
 #include <sstream>
 #include <string>
@@ -37,7 +38,7 @@ class Log {
 
 #ifdef LOG_RANG
   void set_marked_chars_foreground(rang::fg fg) { m_log_lines_fg = fg; }
-#else  
+#endif
 
  private:
   struct Loc {
@@ -59,7 +60,7 @@ class Log {
 
 #ifdef LOG_RANG
   rang::fg m_log_lines_fg = rang::fg::reset;
-#else  
+#endif
 };
 
 #ifdef LOG_IMPLEMENTATION
