@@ -1,4 +1,7 @@
-# LogLoc
+<div>
+  <h1> <img src="./Logo.png" />logLoc</h1>
+</div>
+
 - A simple header only error logging library for compiler development in c++.
 
 
@@ -14,6 +17,7 @@
 ```cpp
 #define LOG_IMPLEMENTATION
 // #define LOG_NO_NAMESPACE // Disable the namespace usage if you want. 
+// #define LOG_RANG // Enables rang usage and highlights marked text instead
 #include <log.h>
 
 #include <fstream>
@@ -69,6 +73,11 @@ src/main.cpp:3:1: Error: Hello, I am a message
 7 | #include <vector>
 8 | 
 ```
+
+### Note
+You can enable a different error printer by defining `LOG_RANG`.
+This will enable code that uses rang to pretty print the error using 
+colors.
 
 ## Contributing
 All contributions are welcome, but mostly will be rejected as I am trying to keep 
