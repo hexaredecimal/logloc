@@ -65,8 +65,8 @@ The example above has the following output:
 ```sh
 src/main.cpp:3:1: Error: Hello, I am a message
 2 | #include <log.h>
-3 | 
     ^^
+3 | 
 4 | #include <fstream>
 5 | #include <iostream>
 6 | #include <string>
